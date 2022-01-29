@@ -544,8 +544,8 @@ def gpcmd(client, message,redis):
 <i>italic</i>
 __italic__
 
-<a href=\"https://t.me/mdddd/\">Mohammed</a>
-[Mohammed](https://t.me/mdddd/)
+<a href=\"https://t.me/FFMFF/\">Abbas</a>
+[Mohammed](https://t.me/FFMFF/)
 
 <code>inline fixed-width code</code>
 `inline fixed-width code`
