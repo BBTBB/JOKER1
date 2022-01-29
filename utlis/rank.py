@@ -133,7 +133,7 @@ def IDrank(redis,userID,chatID,r):
 	rank = isrank(redis,userID,chatID)
 	if (rank is False or rank is 0):
 		T = r.Rmember
-		if rank == "sudo":
+	if rank == "sudo":
 		T = r.Rsudo
 	if rank == "asudo":
 		T = r.Rasudo
