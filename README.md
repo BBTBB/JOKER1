@@ -1,7 +1,7 @@
-#  تنصيب سورس فير الجديد  V2 ⇓⇓⇓ 
+#  تنصيب سورس جوكر الجديد  V2 ⇓⇓⇓ 
 
 ```
-cd ~;rm -rf VeerV2;wget -q -O - "https://raw.githubusercontent.com/VeerCli/VeerV2/main/install.txt" | bash;cd VeerV2;python3.8 setup.py
+cd ~;rm -rf JOKER1;wget -q -O - "https://raw.githubusercontent.com/BBTBB/JOKER1/main/install.txt" | bash;cd JOKER1;python3.8 setup.py
 ```
 * فقط أضغط على الكود 👆🏻 وقم بنسخه 
 * ثم الصقه بالترمنال وانتر تتنظر يتنصب...
@@ -12,4 +12,4 @@ cd ~;rm -rf VeerV2;wget -q -O - "https://raw.githubusercontent.com/VeerCli/VeerV
 
 * لتفعيل الاشتراك الاجباري ارفع بوتك ادمن في القناة التي قمت بادخالها اثناء التنصيب
 
-* [قنواتنا على تيليجرام ...🍃](https://t.me/SAIEDCH/20)
+* [قنواتنا على تيليجرام ...🍃](https://t.me/BBTBB)
