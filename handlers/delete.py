@@ -51,15 +51,7 @@ def delete(client, message,redis):
           Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
             "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
 
-    if re.findall("[ا-ي٠-٩]", text):
-      if redis.sismember("{}Nbot:Larabic".format(BOT_ID),chatID):#5
-        Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
-        if redis.sismember("{}Nbot:Larabic:res".format(BOT_ID),chatID):
-          Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
-            "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
-
-
-    Nlongtext = (redis.get("{}Nbot:Nlongtext".format(BOT_ID)) or 250)
+    Nlongtext = (redis.get("{}Nbot:Nlongtext".format(BOT_ID)) or 1000)
     if len(text) >= Nlongtext:
       if redis.sismember("{}Nbot:Llongtext".format(BOT_ID),chatID):#2
         Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
