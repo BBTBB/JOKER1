@@ -44,24 +44,10 @@ def delete(client, message,redis):
             "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
 
 
-    if re.findall('@', text):
-      if redis.sismember("{}Nbot:Lusername".format(BOT_ID),chatID):#2
-        Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
-        if redis.sismember("{}Nbot:Lusername:res".format(BOT_ID),chatID):
-          Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
-            "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
-
     if message.forward_date:
       if redis.sismember("{}Nbot:Lfwd".format(BOT_ID),chatID):#18
         Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
         if redis.sismember("{}Nbot:Lfwd:res".format(BOT_ID),chatID):
-          Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
-            "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
-
-    if re.findall('#', text):
-      if redis.sismember("{}Nbot:Ltag".format(BOT_ID),chatID):#3
-        Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
-        if redis.sismember("{}Nbot:Ltag:res".format(BOT_ID),chatID):
           Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
             "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
 
