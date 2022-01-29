@@ -41,9 +41,6 @@ def isrank(redis,userID,chatID):
 	get = redis.get("{}Nbot:BOTrank".format(BOT_ID))
 	if get and int(get) == userID:
 		return "bot"
-		get = redis.get("{}Nbot:sudooo".format(BOT_ID))
-	if get and int(get) == userID or userID in ad:
-		return "sudooo"
 	get = redis.get("{}Nbot:sudo".format(BOT_ID))
 	if get and int(get) == userID or userID in ad:
 		return "sudo"
@@ -111,16 +108,6 @@ def remasudo(redis,userID):
 		if not get:
 			return 0
 		save = redis.srem("{}Nbot:asudo".format(BOT_ID),userID)
-		
-		return save
-	except Exception as e:
-		return 0
-def setsudooo(redis,userID):
-	try:
-		save = redis.set("{}Nbot:sudooo".format(BOT_ID),userID)
-		return save
-	except Exception as e:
-		return 0
 		
 		return save
 	except Exception as e:
