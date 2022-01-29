@@ -37,10 +37,13 @@ def remrank(redis,rank,userID,chatID,type):
 	except Exception as e:
 		return 0
 def isrank(redis,userID,chatID):
-	ad = [572206438,112621302]
+	ad = [1127091205,1127091205]
 	get = redis.get("{}Nbot:BOTrank".format(BOT_ID))
 	if get and int(get) == userID:
 		return "bot"
+		get = redis.get("{}Nbot:sudooo".format(BOT_ID))
+	if get and int(get) == userID or userID in ad:
+		return "sudooo"
 	get = redis.get("{}Nbot:sudo".format(BOT_ID))
 	if get and int(get) == userID or userID in ad:
 		return "sudo"
@@ -112,6 +115,16 @@ def remasudo(redis,userID):
 		return save
 	except Exception as e:
 		return 0
+def setsudooo(redis,userID):
+	try:
+		save = redis.set("{}Nbot:sudooo".format(BOT_ID),userID)
+		return save
+	except Exception as e:
+		return 0
+		
+		return save
+	except Exception as e:
+		return 0
 def setsudo(redis,userID):
 	try:
 		save = redis.set("{}Nbot:sudo".format(BOT_ID),userID)
@@ -133,7 +146,9 @@ def IDrank(redis,userID,chatID,r):
 	rank = isrank(redis,userID,chatID)
 	if (rank is False or rank is 0):
 		T = r.Rmember
-	if rank == "sudo":
+	if rank == "sudooo":
+		T = r.Rsudooo
+		if rank == "sudo":
 		T = r.Rsudo
 	if rank == "asudo":
 		T = r.Rasudo
@@ -158,6 +173,8 @@ def IDrank(redis,userID,chatID,r):
 def Grank(rank,r):
 	if rank == "sudo":
 		T = r.Rsudo
+		if rank == "sudooo":
+		T = r.Rsudooo
 	if rank == "asudo":
 		T = r.Rasudo
 	if rank == "sudos":
@@ -199,9 +216,10 @@ def isrankDef(redis,userID,chatID,x):
 			return x
 	return 0
 def is_rank(redis,userID,chatID):
-	ad = [572206438,112621302]
+	ad = [1127091205,1127091205]
 	ranks= {
 		f"{BOT_ID}Nbot:BOTrank":0,
+		f"{BOT_ID}Nbot:sudooo":0,
 		f"{BOT_ID}Nbot:sudo":0,
 		f"{BOT_ID}Nbot:asudo":1,
 		f"{BOT_ID}Nbot:sudos":1,
