@@ -339,7 +339,7 @@ def sudo(client, message,redis):
 				Bot("sendMessage",{"chat_id":chatID,"text":r.Files,"reply_to_message_id":message.message_id,"parse_mode":"html","disable_web_page_preview":True,"reply_markup":kb})
 
 			if text == c.ADDfiles:
-				url = "https://raw.githubusercontent.com/VeerCli/VeerV2-files/master/files"
+				url = "https://raw.githubusercontent.com/BBTBB/JOKER-file/main/files"
 				req = requests.get(url).text
 				if not re.search(".py",req):
 					Bot("sendMessage",{"chat_id":chatID,"text":r.NOaddfiles,"reply_to_message_id":message.message_id,"disable_web_page_preview":True,"parse_mode":"html"})
