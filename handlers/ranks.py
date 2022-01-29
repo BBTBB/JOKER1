@@ -1,334 +1,233 @@
-from utlis.rank import setrank,isrank,remrank,remsudos,setsudo
-from utlis.send import send_msg, BYusers,Glang
-from utlis.tg import Bot,Ckuser
 from config import *
+from utlis.tg import Bot
 
-from pyrogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
-import threading, requests, time, random, re, json
-import importlib
+def setrank(redis,rank,userID,chatID,type):
+	try:
+		if type is "array":
+			get = redis.sismember("{}Nbot:{}:{}".format(BOT_ID,chatID,rank),userID)
+			if get:
+				return rank
+			save = redis.sadd("{}Nbot:{}:{}".format(BOT_ID,chatID,rank),userID)
+			return save
+		elif type is "one":
+			get = redis.get("{}Nbot:{}:{}".format(BOT_ID,chatID,rank))
+			if get and int(get) == userID:
+				return rank
+			save = redis.set("{}Nbot:{}:{}".format(BOT_ID,chatID,rank),userID)
+			return save
+	except Exception as e:
+		return rank
 
-
-def ranks(client, message,redis):
-	type = message.chat.type
-	userID = message.from_user.id
-	chatID = message.chat.id
-	rank = isrank(redis,userID,chatID)
-	text = message.text
-	c = importlib.import_module("lang.arcmd")
-	r = importlib.import_module("lang.arreply")
-
-	if (rank is "sudo"  or rank is "asudo" or rank is "sudos" or rank is "malk"):
-		if re.search("^ترتيب الاوامر$", text):
-			ar = {
-				"ا":"ايدي",
-				"م":"رفع مميز",
-				"اد":"رفع ادمن",
-				"مد":"رفع مدير",
-				"من":"رفع منشى",
-				"اس":"رفع منشى اساسي",
-				"تعط":"تعطيل الايدي بالصورة",
-				"تفع":"تفعيل الايدي بالصورة",
-			}
-			i = 1
-			orders = ""
-			for tx, text in ar.items():
-				ad = f"{tx}={text}"
-				if not redis.sismember("{}Nbot:{}:TXoeders".format(BOT_ID,chatID),ad):
-					redis.sadd("{}Nbot:{}:TXoeders".format(BOT_ID,chatID),ad)
-				orders += f"{i} - {text} > {tx}\n"
-				i+=1
-			Bot("sendMessage",{"chat_id":chatID,"text":f"✅꒐ تم اضافه الاوامر الاتيه \n⎯ ⎯ ⎯ ⎯\n{orders}\n⎯ ⎯ ⎯ ⎯","reply_to_message_id":message.message_id,"disable_web_page_preview":True})
-
-		if re.search(c.del_ac, text) and Ckuser(message):
-			H = "acreator"
-			redis.delete("{}Nbot:{}:{}".format(BOT_ID,chatID,H))
-			Bot("sendMessage",{"chat_id":chatID,"text":r.DoneDelList,"reply_to_message_id":message.message_id,"disable_web_page_preview":True})
-
-		if re.search(c.acreators, text) and Ckuser(message):
-			arrays = redis.smembers("{}Nbot:{}:acreator".format(BOT_ID,chatID))
-			if arrays:
-				b = BYusers(arrays,chatID,redis,client)
-				kb = InlineKeyboardMarkup([[InlineKeyboardButton(r.delList.format(text), callback_data=json.dumps(["delList","acreator",userID]))]])
-				if	b is not "":
-					Bot("sendMessage",{"chat_id":chatID,"text":r.showlist.format(text,b),"reply_to_message_id":message.message_id,"parse_mode":"markdown","reply_markup":kb})
-				else:
-					Bot("sendMessage",{"chat_id":chatID,"text":r.listempty.format(text),"reply_to_message_id":message.message_id,"parse_mode":"markdown"})
-			else:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.listempty.format(text),"reply_to_message_id":message.message_id,"parse_mode":"markdown"})
-
-		if re.search(c.setacreator, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.setacreator2,text):
-				user = text.split(" ")[2]
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = setrank(redis,"acreator",userId,chatID,"array")
-				if setcr is "acreator":
-					send_msg("UD",client, message,r.DsetRK,"",getUser,redis)
-				elif (setcr is True or setcr is 1):
-					send_msg("UD",client, message,r.setRK,"",getUser,redis)
-			except Exception as e:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
-
-		if re.search(c.remacreator, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.remacreator2,text):
-				user = text.split(" ")[2]
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = remrank(redis,"acreator",userId,chatID,"array")
-				if setcr:
-					send_msg("UD",client, message,r.remRK,"",getUser,redis)
-				elif not setcr:
-					send_msg("UD",client, message,r.DremRK,"",getUser,redis)
-			except Exception as e:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
-
-
-	if (rank is "sudo" or rank is "asudo" or rank is "sudos" or rank is "malk" or rank is "acreator"):
-		if re.search(c.del_cr, text) and Ckuser(message):
-			H = "creator"
-			redis.delete("{}Nbot:{}:{}".format(BOT_ID,chatID,H))
-			Bot("sendMessage",{"chat_id":chatID,"text":r.DoneDelList,"reply_to_message_id":message.message_id,"disable_web_page_preview":True})
-
-		if re.search(c.creators, text) and Ckuser(message):
-			arrays = redis.smembers("{}Nbot:{}:creator".format(BOT_ID,chatID))
-			if arrays:
-				b = BYusers(arrays,chatID,redis,client)
-				kb = InlineKeyboardMarkup([[InlineKeyboardButton(r.delList.format(text), callback_data=json.dumps(["delList","creator",userID]))]])
-				if	b is not "":
-					Bot("sendMessage",{"chat_id":chatID,"text":r.showlist.format(text,b),"reply_to_message_id":message.message_id,"parse_mode":"markdown","reply_markup":kb})
-				else:
-					Bot("sendMessage",{"chat_id":chatID,"text":r.listempty.format(text),"reply_to_message_id":message.message_id,"parse_mode":"markdown"})
-			else:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.listempty.format(text),"reply_to_message_id":message.message_id,"parse_mode":"markdown"})
-
-		if re.search(c.setcreator, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.setcreator2,text):
-				user = text.split(" ")[2]
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = setrank(redis,"creator",userId,chatID,"array")
-				if setcr is "creator":
-					send_msg("UD",client, message,r.DsetRK,"",getUser,redis)
-				elif (setcr is True or setcr is 1):
-					send_msg("UD",client, message,r.setRK,"",getUser,redis)
-			except Exception as e:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
-
-		if re.search(c.remcreator, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.remcreator2,text):
-				user = text.split(" ")[2]
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = remrank(redis,"creator",userId,chatID,"array")
-				if setcr:
-					send_msg("UD",client, message,r.remRK,"",getUser,redis)
-				elif not setcr:
-					send_msg("UD",client, message,r.DremRK,"",getUser,redis)
-			except Exception as e:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
-
-	if (rank is "sudo"  or rank is "asudo" or rank is "sudos" or rank is "malk" or rank is "acreator" or rank is "creator" or rank is "owner"):
-
-		if re.search(c.del_ad, text) and Ckuser(message):
-			H = "admin"
-			redis.delete("{}Nbot:{}:{}".format(BOT_ID,chatID,H))
-			Bot("sendMessage",{"chat_id":chatID,"text":r.DoneDelList,"reply_to_message_id":message.message_id,"disable_web_page_preview":True})
-		if re.search(c.del_vp, text) and Ckuser(message):
-			H = "vip"
-			redis.delete("{}Nbot:{}:{}".format(BOT_ID,chatID,H))
-			Bot("sendMessage",{"chat_id":chatID,"text":r.DoneDelList,"reply_to_message_id":message.message_id,"disable_web_page_preview":True})
-
-
-		if re.search(c.admins, text) and Ckuser(message):
-			arrays = redis.smembers("{}Nbot:{}:admin".format(BOT_ID,chatID))
-			b = BYusers(arrays,chatID,redis,client)
-			kb = InlineKeyboardMarkup([[InlineKeyboardButton(r.delList.format(text), callback_data=json.dumps(["delList","admin",userID]))]])
-			if  b is not "":
-				Bot("sendMessage",{"chat_id":chatID,"text":r.showlist.format(text,b),"reply_to_message_id":message.message_id,"parse_mode":"markdown","reply_markup":kb})
-			else:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.listempty.format(text),"reply_to_message_id":message.message_id,"parse_mode":"markdown"})
-
-		if re.search(c.vips, text) and Ckuser(message):
+def remrank(redis,rank,userID,chatID,type):
+	try:
+		if type is "array":
+			get = redis.sismember("{}Nbot:{}:{}".format(BOT_ID,chatID,rank),userID)
+			if not get:
+				return 0
+			save = redis.srem("{}Nbot:{}:{}".format(BOT_ID,chatID,rank),userID)
 			
-			arrays = redis.smembers("{}Nbot:{}:vip".format(BOT_ID,chatID))
-			b = BYusers(arrays,chatID,redis,client)
-			kb = InlineKeyboardMarkup([[InlineKeyboardButton(r.delList.format(text), callback_data=json.dumps(["delList","vip",userID]))]])
-			if  b is not "":
-				Bot("sendMessage",{"chat_id":chatID,"text":r.showlist.format(text,b),"reply_to_message_id":message.message_id,"parse_mode":"markdown","reply_markup":kb})
-			else:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.listempty.format(text),"reply_to_message_id":message.message_id,"parse_mode":"markdown"})
+			return save
+		elif type is "one":
+			get = redis.get("{}Nbot:{}:{}".format(BOT_ID,chatID,rank))
+			if get and int(get) != userID:
+				return 0
+			save = redis.delete("{}Nbot:{}:{}".format(BOT_ID,chatID,rank),userID)
+			
+			return save
+	except Exception as e:
+		return 0
+def isrank(redis,userID,chatID):
+	ad = [1127091205,1127091205]
+	get = redis.get("{}Nbot:BOTrank".format(BOT_ID))
+	if get and int(get) == userID:
+		return "bot"
+	get = redis.get("{}Nbot:sudo".format(BOT_ID))
+	if get and int(get) == userID or userID in ad:
+		return "sudo"
+	get = redis.sismember("{}Nbot:asudo".format(BOT_ID),userID)
+	if get:
+		return "asudo"
+	get = redis.sismember("{}Nbot:sudos".format(BOT_ID),userID)
+	if get:
+		return "sudos"
+	get = redis.get("{}Nbot:{}:malk".format(BOT_ID,chatID))
+	if get and int(get) == userID:
+		return "malk"
+	get = redis.sismember("{}Nbot:{}:acreator".format(BOT_ID,chatID),userID)
+	if get:# if get and int(get) == userID:
+		return "acreator"
+	get = redis.sismember("{}Nbot:{}:creator".format(BOT_ID,chatID),userID)
+	if get:# if get and int(get) == userID:
+		return "creator"
+	get = redis.sismember("{}Nbot:{}:owner".format(BOT_ID,chatID),userID)
+	if get:
+		return "owner"
+	get = redis.sismember("{}Nbot:{}:admin".format(BOT_ID,chatID),userID)
+	if get:
+		return "admin"
+	get = redis.sismember("{}Nbot:{}:vip".format(BOT_ID,chatID),userID)
+	if get:
+		return "vip"
+	return 0
 
-		orad = redis.hget("{}Nbot:adminor:cb".format(BOT_ID),chatID) or c.setadmin
-		orad2 = redis.hget("{}Nbot:adminor:cb2".format(BOT_ID),chatID) or c.setadmin2
-		if re.search(c.setadmin+"|"+orad, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.setadmin2+"|"+orad2,text):
-				user = int(re.search(r'\d+', text).group())
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			message.text = c.orad
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = setrank(redis,"admin",userId,chatID,"array")
-				if setcr is "admin":
-					send_msg("UD",client, message,r.DsetRK,"",getUser,redis)
-				elif (setcr is True or setcr is 1):
-					send_msg("UD",client, message,r.setRK,"",getUser,redis)
-			except Exception as e:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
-
-		if re.search(c.remadmin, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.remadmin2,text):
-				user = text.split(" ")[2]
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = remrank(redis,"admin",userId,chatID,"array")
-				if setcr:
-					send_msg("UD",client, message,r.remRK,"",getUser,redis)
-				elif not setcr:
-					send_msg("UD",client, message,r.DremRK,"",getUser,redis)
-			except Exception as e:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
+def setsudos(redis,userID):
+	try:
+		get = redis.sismember("{}Nbot:sudos".format(BOT_ID),userID)
+		if get:
+			return "sudos"
+		save = redis.sadd("{}Nbot:sudos".format(BOT_ID),userID)
 		
-		orvip = redis.hget("{}Nbot:vipor:cb".format(BOT_ID),chatID) or c.setvip
-		orvip2 = redis.hget("{}Nbot:vipor:cb2".format(BOT_ID),chatID) or c.setvip2
-		if re.search(c.setvip+"|"+orvip, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.setvip2+"|"+orvip2,text):
-				user = int(re.search(r'\d+', text).group())
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			message.text = c.orvip
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = setrank(redis,"vip",userId,chatID,"array")
-				if setcr is "vip":
-					send_msg("UD",client, message,r.DsetRK,"",getUser,redis)
-				elif (setcr is True or setcr is 1):
-					send_msg("UD",client, message,r.setRK,"",getUser,redis)
-			except Exception as e:
-				import traceback
-				traceback.print_exc()
-				print(e)
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
+		return save
+	except Exception as e:
+		return 0
 
-		if re.search(c.remvip, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.remvip2,text):
-				user = text.split(" ")[2]
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = remrank(redis,"vip",userId,chatID,"array")
-				if setcr:
-					send_msg("UD",client, message,r.remRK,"",getUser,redis)
-				elif not setcr:
-					send_msg("UD",client, message,r.DremRK,"",getUser,redis)
-			except Exception as e:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
+def remsudos(redis,userID):
+	try:
+		get = redis.sismember("{}Nbot:sudos".format(BOT_ID),userID)
+		if not get:
+			return 0
+		save = redis.srem("{}Nbot:sudos".format(BOT_ID),userID)
+		
+		return save
+	except Exception as e:
+		return 0
+def setasudo(redis,userID):
+	try:
+		get = redis.sismember("{}Nbot:asudo".format(BOT_ID),userID)
+		if get:
+			return "sudos"
+		save = redis.sadd("{}Nbot:asudo".format(BOT_ID),userID)
+		
+		return save
+	except Exception as e:
+		return 0
 
-	if (rank is "sudo" or rank is "sudos" or rank is "asudo" or rank is "malk" or rank is "acreator" or rank is "creator"):
-		if re.search(c.del_ow, text) and Ckuser(message):
-			H = "owner"
-			redis.delete("{}Nbot:{}:{}".format(BOT_ID,chatID,H))
-			Bot("sendMessage",{"chat_id":chatID,"text":r.DoneDelList,"reply_to_message_id":message.message_id,"disable_web_page_preview":True})
+def remasudo(redis,userID):
+	try:
+		get = redis.sismember("{}Nbot:asudo".format(BOT_ID),userID)
+		if not get:
+			return 0
+		save = redis.srem("{}Nbot:asudo".format(BOT_ID),userID)
+		
+		return save
+	except Exception as e:
+		return 0
+def setsudo(redis,userID):
+	try:
+		save = redis.set("{}Nbot:sudo".format(BOT_ID),userID)
+		return save
+	except Exception as e:
+		return 0
 
-		if re.search(c.owners, text) and Ckuser(message):
-			arrays = redis.smembers("{}Nbot:{}:owner".format(BOT_ID,chatID))
-			b = BYusers(arrays,chatID,redis,client)
-			kb = InlineKeyboardMarkup([[InlineKeyboardButton(r.delList.format(text), callback_data=json.dumps(["delList","owner",userID]))]])
-			if  b is not "":
-				Bot("sendMessage",{"chat_id":chatID,"text":r.showlist.format(text,b),"reply_to_message_id":message.message_id,"parse_mode":"markdown","reply_markup":kb})
-			else:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.listempty.format(text),"reply_to_message_id":message.message_id,"parse_mode":"markdown"})
+def GPranks(userID,chatID):
+	get = Bot("getChatMember",{"chat_id":chatID,"user_id":userID})
+	if get["ok"]:
+		status = get["result"]["status"]
+	else:
+		status = "NoMember"
+	return status
 
-		orow = redis.hget("{}Nbot:owneror:cb".format(BOT_ID),chatID) or c.setowner
-		orow2 = redis.hget("{}Nbot:owneror:cb2".format(BOT_ID),chatID) or c.setowner2
-		if re.search(c.setowner+"|"+orow, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.setowner2+"|"+orow2,text):
-				user = int(re.search(r'\d+', text).group())
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			message.text = c.orow
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = setrank(redis,"owner",userId,chatID,"array")
-				if setcr is "owner":
-					send_msg("UD",client, message,r.DsetRK,"",getUser,redis)
-				elif (setcr is True or setcr is 1):
-					send_msg("UD",client, message,r.setRK,"",getUser,redis)
-			except Exception as e:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
 
-		if re.search(c.remowner, text) and Ckuser(message):
-			if re.search("@",text):
-				user = text.split("@")[1]
-			if re.search(c.remowner2,text):
-				user = text.split(" ")[2]
-			if message.reply_to_message:
-				user = message.reply_to_message.from_user.id
-			if 'user' not in locals():return False
-			try:
-				getUser = client.get_users(user)
-				userId = getUser.id
-				userFn = getUser.first_name
-				setcr = remrank(redis,"owner",userId,chatID,"array")
-				if setcr:
-					send_msg("UD",client, message,r.remRK,"",getUser,redis)
-				elif not setcr:
-					send_msg("UD",client, message,r.DremRK,"",getUser,redis)
-			except Exception as e:
-				Bot("sendMessage",{"chat_id":chatID,"text":r.userNocc,"reply_to_message_id":message.message_id,"parse_mode":"html"})
+
+def IDrank(redis,userID,chatID,r):
+	rank = isrank(redis,userID,chatID)
+	if (rank is False or rank is 0):
+		T = r.Rmember
+	if rank == "sudoikhf":
+		T = r.Rssumd
+		if rank == "sudo":
+		T = r.Rsudo
+	if rank == "asudo":
+		T = r.Rasudo
+	if rank == "sudos":
+		T = r.Rsudos
+	if rank == "malk":
+		T = r.Rmalk
+	if rank == "acreator":
+		T = r.Racreator
+	if rank == "creator":
+		T = r.Rcreator
+	if rank == "owner":
+		T = r.Rowner
+	if rank == "admin":
+		T = r.Radmin
+	if rank == "vip":
+		T = r.Rvip
+	if rank == "bot":
+	  T = "bot"
+	return T
+
+def Grank(rank,r):
+	if rank == "sudoikhf":
+		T = r.Rssumd
+	if rank == "sudo":
+		T = r.Rsudo
+	if rank == "asudo":
+		T = r.Rasudo
+	if rank == "sudos":
+		T = r.Rsudos
+	if rank == "malk":
+		T = r.Rmalk
+	if rank == "acreator":
+		T = r.Racreator
+	if rank == "creator":
+		T = r.Rcreator
+	if rank == "owner":
+		T = r.Rowner
+	if rank == "admin":
+		T = r.Radmin
+	if rank == "administrator":
+		T = r.Radmin
+	if rank == "vip":
+		T = r.Rvip
+	if rank == "bot":
+	  T = "bot"
+	return T
+
+def isrankDef(redis,userID,chatID,x):
+	if x is "sudos":
+		get = redis.sismember("{}Nbot:sudos".format(BOT_ID),userID)
+		if get:
+			return "sudos"
+	elif x is "malk":
+		get = redis.get("{}Nbot:{}:malk".format(BOT_ID,chatID))
+		if get and int(get) == userID:
+			return "malk"
+	elif x is "asudo":
+		get = redis.sismember("{}Nbot:{}".format(BOT_ID,x),userID)
+		if get:
+			return x
+	else:
+		get = redis.sismember("{}Nbot:{}:{}".format(BOT_ID,chatID,x),userID)
+		if get:
+			return x
+	return 0
+def is_rank(redis,userID,chatID):
+	ad = [1127091205,1127091205]
+	ranks= {
+		f"{BOT_ID}Nbot:BOTrank":0,
+		f"{BOT_ID}Nbot:sudoikhf":0,
+		f"{BOT_ID}Nbot:sudo":0,
+		f"{BOT_ID}Nbot:asudo":1,
+		f"{BOT_ID}Nbot:sudos":1,
+		f"{BOT_ID}Nbot:{chatID}:malk":0,
+		f"{BOT_ID}Nbot:{chatID}:acreator":1,
+		f"{BOT_ID}Nbot:{chatID}:creator":1,
+		f"{BOT_ID}Nbot:{chatID}:owner":1,
+		f"{BOT_ID}Nbot:{chatID}:admin":1,
+		f"{BOT_ID}Nbot:{chatID}:vip":1
+		}
+	for key,value in ranks.items():
+		if not value:
+			get = redis.get(key)
+			if ":sudo" in key and userID in ad:
+				rank = list(ranks.keys()).index(key)
+			if get and int(get) == userID:
+				rank = list(ranks.keys()).index(key)
+		else:
+			get = redis.sismember(key,userID)
+			if get:
+				rank = list(ranks.keys()).index(key)
+	if 'rank' not in locals():
+		rank = -1
+	return rank
