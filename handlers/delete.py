@@ -44,6 +44,13 @@ def delete(client, message,redis):
             "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
 
 
+    if re.findall('@', text):
+      if redis.sismember("{}Nbot:Lusername".format(BOT_ID),chatID):#2
+        Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
+        if redis.sismember("{}Nbot:Lusername:res".format(BOT_ID),chatID):
+          Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
+            "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
+
     if message.forward_date:
       if redis.sismember("{}Nbot:Lfwd".format(BOT_ID),chatID):#18
         Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
@@ -51,7 +58,29 @@ def delete(client, message,redis):
           Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
             "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
 
-    Nlongtext = (redis.get("{}Nbot:Nlongtext".format(BOT_ID)) or 1000)
+    if re.findall('#', text):
+      if redis.sismember("{}Nbot:Ltag".format(BOT_ID),chatID):#3
+        Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
+        if redis.sismember("{}Nbot:Ltag:res".format(BOT_ID),chatID):
+          Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
+            "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
+
+    if re.findall("[a-zA-Z0-9$@$!%*?&#^-_. +]+", text):
+      if redis.sismember("{}Nbot:Lenglish".format(BOT_ID),chatID):#4
+        Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
+        if redis.sismember("{}Nbot:Lenglish:res".format(BOT_ID),chatID):
+          Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
+            "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
+
+    if re.findall("[ا-ي٠-٩]", text):
+      if redis.sismember("{}Nbot:Larabic".format(BOT_ID),chatID):#5
+        Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
+        if redis.sismember("{}Nbot:Larabic:res".format(BOT_ID),chatID):
+          Bot("restrictChatMember",{"chat_id": chatID,"user_id": userId,"can_send_messages": 0,"can_send_media_messages": 0,"can_send_other_messages": 0,
+            "can_send_polls": 0,"can_change_info": 0,"can_add_web_page_previews": 0,"can_pin_messages": 0,"can_invite_users": 0,})
+
+
+    Nlongtext = (redis.get("{}Nbot:Nlongtext".format(BOT_ID)) or 250)
     if len(text) >= Nlongtext:
       if redis.sismember("{}Nbot:Llongtext".format(BOT_ID),chatID):#2
         Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
@@ -208,6 +237,6 @@ def delete(client, message,redis):
 
     redis.setex("{}Nbot:{}:{}:flood".format(BOT_ID,chatID,userID), Time_ck, User_msg+1)
 
-  if re.findall("[Hh][Tt][Tt][Pp][Ss]:/|[Hh][Tt][Tt][Pp]://|.[Ii][Rr]|.[Cc][Oo][Mm]|.[Oo][Rr][Gg]|.[Ii][Nn][Ff][Oo]|[Ww][Ww][Ww]|.[Tt][Kk]|.[Mm][Ee]", text) or message.via_bot or message.reply_markup or message.sticker or message.animation or message.audio or message.voice or message.video or message.document or message.photo or message.contact or message.forward_date or message.video_note:
+  if re.findall("[Hh][Tt][Tt][Pp][Ss]:/|[Hh][Tt][Tt][Pp]://|.[Ii][Rr]|.[Cc][Oo][Mm]|.[Oo][Rr][Gg]|.[Ii][Nn][Ff][Oo]|[Ww][Ww][Ww]|.[Tt][Kk]|.[Mm][Ee]", text) or re.findall('@', text) or re.findall('#', text) or re.findall("[a-zA-Z0-9$@$!%*?&#^-_. +]+", text) or message.via_bot or message.reply_markup or message.sticker or message.animation or message.audio or message.voice or message.video or message.document or message.photo or message.contact or message.forward_date or message.video_note:
     if redis.sismember("{}Nbot:Lall".format(BOT_ID),chatID):#20
       Bot("deleteMessage",{"chat_id":chatID,"message_id":message.message_id})
