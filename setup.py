@@ -18,7 +18,7 @@ API_HASH = '9f4461079f30757ca0a4c23e14bd523f'
   ID = ""
   go = True
   while go:
-    token = input("input you're bot TOKEN:")
+    token = input("عزيزي'ارسل توكن البوت")
     get = Bot(token,"getme",{})
     if get["ok"]:
       out = out+"\n"+"TOKEN = '{}'\nBOT_ID = TOKEN.split(':')[0]".format(token)
@@ -26,11 +26,11 @@ API_HASH = '9f4461079f30757ca0a4c23e14bd523f'
       ID = token.split(':')[0]
 
     else:
-      print("TOKEN is invalid, Try again")
+      print("التوكن غلط اعد المحاولة")
 
-  sudo = input("input you're ID:")
+  sudo = input("عزيزي'ارسل ايدي المطور")
   out = out+"\n"+"SUDO = {}".format(sudo)
-  BBTBB = input("input you're username Channel: @")
+  BBTBB = input("عزيزي'ارسل معرف قناتك: @")
   out = out+"\n"+"BBTBB = '{}'".format(BBTBB)
 
   f = open("config.py","w+") 
