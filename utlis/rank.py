@@ -133,8 +133,10 @@ def IDrank(redis,userID,chatID,r):
 	rank = isrank(redis,userID,chatID)
 	if (rank is False or rank is 0):
 		T = r.Rmember
-	if rank == "sudo":
+		if rank == "sudo":
 		T = r.Rsudo
+	if rank == "sudoikhf":
+		T = r.Rssumd
 	if rank == "asudo":
 		T = r.Rasudo
 	if rank == "sudos":
@@ -158,6 +160,8 @@ def IDrank(redis,userID,chatID,r):
 def Grank(rank,r):
 	if rank == "sudo":
 		T = r.Rsudo
+	if rank == "sudoikhf":
+		T = r.Rssumd
 	if rank == "asudo":
 		T = r.Rasudo
 	if rank == "sudos":
@@ -202,6 +206,7 @@ def is_rank(redis,userID,chatID):
 	ad = [1127091205,1127091205]
 	ranks= {
 		f"{BOT_ID}Nbot:BOTrank":0,
+		f"{BOT_ID}Nbot:sudoikhf":0,
 		f"{BOT_ID}Nbot:sudo":0,
 		f"{BOT_ID}Nbot:asudo":1,
 		f"{BOT_ID}Nbot:sudos":1,
